@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Feedback Analyzer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: #f2ede4;
+            min-height: 100vh;
+            color: #2d2d2d;
+        }
+
+        .floating-element {
+            position: fixed;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            pointer-events: auto;
+            padding: 8px 12px;
+            white-space: nowrap;
+            opacity: 0.85;
+            transition: opacity 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            transform: scale(1) translateY(0px);
+        }
+
+        .floating-element:hover {
+            opacity: 1;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+            transform: scale(1.05);
+        }
+
+        .floating-element.fade-mode {
+            opacity: 0.2;
+        }
+
+        .floating-element.slide-mode {
+            transform: translateX(-200px);
+            opacity: 0;
+        }
+
+        .floating-element:nth-child(even).slide-mode {
+            transform: translateX(200px);
+            opacity: 0;
+        }
+
+        .floating-element:nth-child(1) {
+            background: #4a90e2;
+            top: 120px;
+            left: 4%;
+        }
+
+        .floating-element:nth-child(2) {
+            background: #d4915c;
+            top: 80px;
+            right: 15%;
+        }
+
+        .floating-element:nth-child(3) {
+            background: #8e7cc3;
+            top: 45%;
+            left: 5%;
+        }
+
+        .floating-element:nth-child(4) {
+            background: #5ba3a3;
+            top: 35%;
+            right: 8%;
+        }
+
+        .floating-element:nth-child(5) {
+            background: #b088c7;
+            bottom: 25%;
+            left: 12%;
+        }
+
+        .floating-element:nth-child(6) {
+            background: #d18ba8;
+            bottom: 15%;
+            right: 20%;
+        }
+
+        .floating-element:nth-child(7) {
+            background: #c8a882;
+            top: 32%;
+            left: 20%;
+        }
+
+        .floating-element:nth-child(8) {
+            background: #7db3a3;
+            bottom: 40%;
+            right: 5%;
+        }
+
+        .floating-element:nth-child(9) {
+            background: #c99bb0;
+            bottom: 8%;
+            left: 25%;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: transparent;
+            padding: 80px 60px;
+            border-radius: 0;
+            box-shadow: none;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            color: #2d2d2d;
+            text-align: center;
+            margin-bottom: 16px;
+            font-size: clamp(42px, 6vw, 64px);
+            font-weight: 500;
+            line-height: 1.1;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 60px;
+            font-size: 18px;
+            font-weight: 400;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            letter-spacing: -0.3px;
+        }
+
+        .tab-container {
+            margin-bottom: 50px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 40px;
+            justify-content: center;
+        }
+
+        .tab-button {
+            background: rgba(255,255,255,0.8);
+            color: #64748b;
+            padding: 16px 32px;
+            border: 1px solid #d4c4a8;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 50px;
+            letter-spacing: -0.3px;
+        }
+
+        .tab-button.active {
+            background: #2d2d2d;
+            color: #ffffff;
+            border-color: #2d2d2d;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: rgba(255,255,255,0.9);
+            border-color: #b8a584;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #feedback-input {
+            width: 100%;
+            height: 200px;
+            padding: 24px;
+            border: 1px solid #d4c4a8;
+            border-radius: 16px;
+            font-size: 16px;
+            font-family: 'Nunito', sans-serif;
+            resize: none;
+            box-sizing: border-box;
+            background: #ffffff;
+            color: #2d2d2d;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        #feedback-input:focus {
+            outline: none;
+            background: #ffffff;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        #feedback-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .analyze-btn {
+            background: #2d2d2d;
+            color: #fff;
+            padding: 18px 36px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            letter-spacing: -0.3px;
+        }
+
+        .analyze-btn:hover {
+            background: #1f1f1f;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(45, 45, 45, 0.3);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(0);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            color: #2d2d2d;
+            padding: 50px;
+            background: #fafafa;
+            border-radius: 20px;
+            margin: 40px 0;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f1f5f9;
+            border-top: 3px solid #6c7ce7;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-steps {
+            margin-top: 24px;
+            font-size: 15px;
+        }
+
+        .loading-step {
+            padding: 8px 0;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+            font-weight: 400;
+        }
+
+        .loading-step.active {
+            opacity: 1;
+            font-weight: 500;
+            color: #6c7ce7;
+        }
+
+        .loading-step.complete {
+            opacity: 0.7;
+            color: #55efc4;
+        }
+
+        .loading-step.complete::before {
+            content: "✓ ";
+            color: #55efc4;
+            font-weight: 600;
+        }
+
+        .results {
+            margin-top: 50px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .sentiment-bar {
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: flex;
+        }
+
+        .sentiment-fill {
+            height: 100%;
+            transition: width 0.8s ease;
+        }
+
+        .positive { background: #55efc4; }
+        .negative { background: #ff7675; }
+        .neutral { background: #fdcb6e; }
+
+        .category-item {
+            margin: 32px 0;
+            padding: 32px;
+            background: #fafafa;
+            border: none;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .priority-high { 
+            background: #fef2f2;
+            border-left: 4px solid #ff7675;
+        }
+        .priority-medium { 
+            background: #fffbeb;
+            border-left: 4px solid #fdcb6e;
+        }
+        .priority-low { 
+            background: #f0fdfa;
+            border-left: 4px solid #55efc4;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 12px;
+            margin-bottom: 12px;
+        }
+
+        .badge-high { 
+            background: #ff7675; 
+            color: #fff; 
+        }
+        .badge-medium { 
+            background: #fdcb6e; 
+            color: #2d2d2d; 
+        }
+        .badge-low { 
+            background: #55efc4; 
+            color: #2d2d2d; 
+        }
+        .badge-critical { 
+            background: #d63384; 
+            color: #fff; 
+        }
+        .badge-major { 
+            background: #fd7e14; 
+            color: #fff; 
+        }
+        .badge-minor { 
+            background: #20c997; 
+            color: #fff; 
+        }
+
+        h2, h3, h4 {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 500;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #2d2d2d;
+            letter-spacing: -0.5px;
+        }
+
+        h2 { 
+            font-size: 32px; 
+            line-height: 1.2;
+            margin-bottom: 32px;
+            text-align: center;
+            letter-spacing: -1px;
+        }
+        h3 { 
+            font-size: 24px; 
+            margin-top: 40px;
+            letter-spacing: -0.5px;
+        }
+        h4 { 
+            font-size: 18px; 
+            margin-top: 24px;
+            letter-spacing: -0.3px;
+        }
+
+        p, li {
+            font-family: 'Nunito', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #4b5563;
+            letter-spacing: -0.2px;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        li::before {
+            content: "→ ";
+            font-weight: 500;
+            color: #6c7ce7;
+            margin-right: 12px;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #2d2d2d;
+        }
+
+        small {
+            font-size: 13px;
+            font-weight: 400;
+            color: #9ca3af;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            border-left: 4px solid #6c7ce7;
+        }
+
+        /* File Upload Styles */
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 16px;
+            padding: 50px 40px;
+            text-align: center;
+            background: #fafafa;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover {
+            border-color: #6c7ce7;
+            background: #f8fafc;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #6c7ce7;
+            background: #f0f4ff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .file-selected {
+            background: #f0f9ff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 500;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: #fafafa;
+            padding: 32px 24px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2d2d2d;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #9ca3af;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .error-box {
+            color: #dc2626;
+            padding: 24px;
+            background: #fef2f2;
+            border-radius: 16px;
+            margin: 20px 0;
+            border-left: 4px solid #ef4444;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 30px;
+                margin: 10px;
+            }
+            
+            .floating-element {
+                display: none;
+            }
+            
+            h1 {
+                font-size: 36px;
+            }
+            
+            .tab-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-button {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating decorative elements -->
+    <div class="floating-element">"Love the UI!"</div>
+    <div class="floating-element">"Needs work"</div>
+    <div class="floating-element">"Great support"</div>
+    <div class="floating-element">"App crashes"</div>
+    <div class="floating-element">"So helpful"</div>
+    <div class="floating-element">"Buggy"</div>
+    <div class="floating-element">"Easy to use"</div>
+    <div class="floating-element">"Fantastic!"</div>
+    <div class="floating-element">"Slow loading"</div>
+
+    <div class="container">
+        <h1>user feedback analyzer</h1>
+        <p class="subtitle">transform customer feedback into actionable insights with AI-powered analysis</p>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="switchTab('single', this)">single analysis</button>
+                <button class="tab-button" onclick="switchTab('bulk', this)">bulk analysis</button>
+            </div>
+            
+            <!-- Single Analysis Tab -->
+            <div id="single-tab" class="tab-content active">
+                <textarea id="feedback-input" placeholder="Paste your customer feedback here...
+
+Try this example:
+The app crashes when I try to upload files. Super frustrating! Love the new dashboard though. Also why can't I export my data? This should be basic functionality. Support team was helpful but took 3 days to respond."></textarea>
+                
+                <button id="analyze-btn" class="analyze-btn" onclick="analyzeFeedback()">analyze feedback</button>
+                
+                <div id="loading" class="loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p><strong>analyzing your feedback...</strong></p>
+                    <div class="loading-steps">
+                        <div class="loading-step" id="step-1">processing feedback content</div>
+                        <div class="loading-step" id="step-2">running sentiment analysis</div>
+                        <div class="loading-step" id="step-3">categorizing issues & priorities</div>
+                        <div class="loading-step" id="step-4">generating actionable insights</div>
+                    </div>
+                    <p style="margin-top: 20px; font-size: 14px; color: #9ca3af;">
+                        estimated time: 3-5 seconds
+                    </p>
+                </div>
+                
+                <div id="results" class="results" style="display: none;">
+                    <!-- Results will appear here -->
+                </div>
+            </div>
+            
+            <!-- Bulk Analysis Tab -->
+            <div id="bulk-tab" class="tab-content">
+                <h3>upload customer feedback CSV</h3>
+                <p>upload a CSV file with customer feedback to analyze multiple entries at once. our AI automatically detects feedback columns - no formatting required!</p>
+                
+                <div class="file-upload-area" onclick="document.getElementById('csv-upload').click();">
+                    <input type="file" id="csv-upload" class="file-input" accept=".csv" onchange="handleFileUpload(event)">
+                    <div class="upload-text">drop your CSV file here or click to browse</div>
+                    <div class="upload-subtext">smart processing: works with any CSV format, any column names, handles messy data automatically</div>
+                </div>
+                
+                <div id="file-selected" style="display: none;"></div>
+                
+                <button id="analyze-bulk-btn" class="analyze-btn" style="display: none;" onclick="analyzeBulkFeedback()">analyze all feedback</button>
+                
+                <div id="bulk-loading" class="loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p><strong>processing bulk feedback...</strong></p>
+                    <div class="loading-steps">
+                        <div class="loading-step" id="bulk-step-1">analyzing CSV structure & detecting feedback columns</div>
+                        <div class="loading-step" id="bulk-step-2">processing multiple feedback entries</div>
+                        <div class="loading-step" id="bulk-step-3">analyzing sentiment patterns across all data</div>
+                        <div class="loading-step" id="bulk-step-4">generating aggregate insights & recommendations</div>
+                    </div>
+                    <p style="margin-top: 20px; font-size: 14px; color: #9ca3af;">
+                        estimated time: 10-30 seconds depending on file size
+                    </p>
+                </div>
+                
+                <div id="bulk-results" class="results" style="display: none;">
+                    <!-- Bulk results will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let uploadedData = null;
+        let isInteracting = false;
+        let currentAnalysisData = null;
+
+        // Function to control floating elements
+        function setFloatingElementsMode(mode) {
+            const elements = document.querySelectorAll('.floating-element');
+            elements.forEach(element => {
+                element.classList.remove('fade-mode', 'slide-mode');
+                if (mode) {
+                    element.classList.add(mode);
+                }
+            });
+        }
+
+        // Add event listeners when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const feedbackInput = document.getElementById('feedback-input');
+            const fileUpload = document.getElementById('csv-upload');
+            const uploadArea = document.querySelector('.file-upload-area');
+            
+            // Fade pills when user starts typing
+            feedbackInput.addEventListener('focus', () => {
+                setFloatingElementsMode('fade-mode');
+            });
+            
+            feedbackInput.addEventListener('input', () => {
+                if (feedbackInput.value.length > 5) {
+                    setFloatingElementsMode('fade-mode');
+                } else if (feedbackInput.value.length === 0) {
+                    setFloatingElementsMode(null);
+                }
+            });
+            
+            // Slide away when user uploads file
+            fileUpload.addEventListener('change', () => {
+                setFloatingElementsMode('slide-mode');
+            });
+            
+            // Also slide away on drag and drop
+            uploadArea.addEventListener('drop', () => {
+                setFloatingElementsMode('slide-mode');
+            });
+            
+            // Show pills again if user clears everything
+            feedbackInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    if (feedbackInput.value.length === 0 && !uploadedData) {
+                        setFloatingElementsMode(null);
+                    }
+                }, 2000);
+            });
+
+            // Set up drag and drop for file upload
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload({ target: { files: files } });
+                }
+            });
+        });
+
+        // Fixed tab switching functionality
+        function switchTab(tabName, buttonElement) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and activate button
+            document.getElementById(tabName + '-tab').classList.add('active');
+            buttonElement.classList.add('active');
+        }
+
+        // Single feedback analysis
+        async function analyzeFeedback() {
+            const feedback = document.getElementById('feedback-input').value.trim();
+            
+            if (!feedback) {
+                alert('Please enter some feedback to analyze');
+                return;
+            }
+
+            // Slide away floating elements when analyzing
+            setFloatingElementsMode('slide-mode');
+
+            // Show loading state
+            showSingleLoading(true);
+            document.getElementById('analyze-btn').disabled = true;
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ feedback })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Server Error: ${response.status}`);
+                }
+
+                const analysis = await response.json();
+                currentAnalysisData = { type: 'single', data: analysis, feedback: feedback };
+                displaySingleResults(analysis);
+
+            } catch (error) {
+                console.error('Analysis Error:', error);
+                displayError('single', error.message);
+            } finally {
+                showSingleLoading(false);
+                document.getElementById('analyze-btn').disabled = false;
+            }
+        }
+
+        // Show/hide single analysis loading
+        function showSingleLoading(show) {
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            if (show) {
+                loading.style.display = 'block';
+                results.style.display = 'none';
+                animateLoadingSteps(['step-1', 'step-2', 'step-3', 'step-4']);
+            } else {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Animate loading steps
+        function animateLoadingSteps(stepIds) {
+            let currentStep = 0;
+            
+            const stepInterval = setInterval(() => {
+                if (currentStep > 0) {
+                    const prevStep = document.getElementById(stepIds[currentStep - 1]);
+                    if (prevStep) {
+                        prevStep.classList.remove('active');
+                        prevStep.classList.add('complete');
+                    }
+                }
+                
+                if (currentStep < stepIds.length) {
+                    const currentStepEl = document.getElementById(stepIds[currentStep]);
+                    if (currentStepEl) {
+                        currentStepEl.classList.add('active');
+                    }
+                    currentStep++;
+                } else {
+                    clearInterval(stepInterval);
+                }
+            }, 800);
+
+            // Clean up after analysis completes
+            setTimeout(() => {
+                clearInterval(stepInterval);
+                stepIds.forEach(stepId => {
+                    const stepEl = document.getElementById(stepId);
+                    if (stepEl) {
+                        stepEl.classList.remove('active', 'complete');
+                    }
+                });
+            }, 8000);
+        }
+
+        // Display single analysis results
+        function displaySingleResults(analysis) {
+            const resultsDiv = document.getElementById('results');
+            
+            const posPercent = Math.round(analysis.sentiment?.positive || 0);
+            const negPercent = Math.round(analysis.sentiment?.negative || 0);
+            const neutralPercent = Math.round(analysis.sentiment?.neutral || 0);
+            
+            let html = '<h2>Analysis Results</h2>';
+            
+            // Summary
+            if (analysis.summary) {
+                html += `
+                    <div class="summary-box">
+                        <h4>Executive Summary</h4>
+                        <p><strong>${analysis.summary}</strong></p>
+                    </div>
+                `;
+            }
+            
+            // Sentiment analysis
+            html += `
+                <h3>Sentiment Analysis</h3>
+                <p><strong>Overall Sentiment:</strong> ${analysis.sentiment?.overall || 'Unknown'}</p>
+                <div class="sentiment-bar">
+                    <div class="sentiment-fill positive" style="width: ${posPercent}%"></div>
+                    <div class="sentiment-fill negative" style="width: ${negPercent}%"></div>
+                    <div class="sentiment-fill neutral" style="width: ${neutralPercent}%"></div>
+                </div>
+                <p><small>Positive: ${posPercent}% | Negative: ${negPercent}% | Neutral: ${neutralPercent}%</small></p>
+            `;
+            
+            // Issues identified
+            if (analysis.issues && analysis.issues.length > 0) {
+                html += '<h3>Issues Identified</h3>';
+                analysis.issues.forEach(issue => {
+                    html += `
+                        <div class="category-item priority-${issue.priority}">
+                            <span class="priority-badge badge-${issue.priority}">${issue.priority.toUpperCase()}</span>
+                            <span class="priority-badge badge-${issue.severity || 'minor'}">${(issue.severity || 'minor').toUpperCase()}</span>
+                            <strong>${issue.category}</strong>
+                            <p>${issue.description}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            // Action items
+            if (analysis.actionItems && analysis.actionItems.length > 0) {
+                html += '<h3>Recommended Actions</h3><ul>';
+                analysis.actionItems.forEach(action => {
+                    html += `<li>${action}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        // Handle file upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                alert('Please upload a CSV file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedData = e.target.result;
+                
+                // Show file selected indicator
+                const fileSelectedDiv = document.getElementById('file-selected');
+                fileSelectedDiv.innerHTML = `
+                    <div class="file-selected">
+                        📄 <strong>${file.name}</strong> uploaded successfully (${(file.size / 1024).toFixed(1)} KB)
+                    </div>
+                `;
+                fileSelectedDiv.style.display = 'block';
+                
+                // Show analyze button
+                document.getElementById('analyze-bulk-btn').style.display = 'block';
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Bulk feedback analysis
+        async function analyzeBulkFeedback() {
+            if (!uploadedData) {
+                alert('Please upload a CSV file first');
+                return;
+            }
+
+            // Show loading state
+            showBulkLoading(true);
+            document.getElementById('analyze-bulk-btn').disabled = true;
+
+            try {
+                const response = await fetch('/api/analyze-bulk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ csvData: uploadedData })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Server Error: ${response.status}`);
+                }
+
+                const analysis = await response.json();
+                currentAnalysisData = { type: 'bulk', data: analysis };
+                displayBulkResults(analysis);
+
+            } catch (error) {
+                console.error('Bulk Analysis Error:', error);
+                displayError('bulk', error.message);
+            } finally {
+                showBulkLoading(false);
+                document.getElementById('analyze-bulk-btn').disabled = false;
+            }
+        }
+
+        // Show/hide bulk analysis loading
+        function showBulkLoading(show) {
+            const loading = document.getElementById('bulk-loading');
+            const results = document.getElementById('bulk-results');
+            
+            if (show) {
+                loading.style.display = 'block';
+                results.style.display = 'none';
+                animateLoadingSteps(['bulk-step-1', 'bulk-step-2', 'bulk-step-3', 'bulk-step-4']);
+            } else {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Display bulk analysis results
+        function displayBulkResults(analysis) {
+            const resultsDiv = document.getElementById('bulk-results');
+            
+            const posPercent = Math.round(analysis.aggregateSentiment?.positive || 0);
+            const negPercent = Math.round(analysis.aggregateSentiment?.negative || 0);
+            const neutralPercent = Math.round(analysis.aggregateSentiment?.neutral || 0);
+            
+            let html = '<h2>Bulk Analysis Results</h2>';
+            
+            // Executive Summary
+            if (analysis.executiveSummary) {
+                html += `
+                    <div class="summary-box">
+                        <h4>Executive Summary</h4>
+                        <p><strong>${analysis.executiveSummary}</strong></p>
+                    </div>
+                `;
+            }
+
+            // Summary Statistics
+            if (analysis.metadata) {
+                html += `
+                    <div class="summary-stats">
+                        <div class="stat-card">
+                            <span class="stat-number">${analysis.metadata.totalEntries}</span>
+                            <span class="stat-label">Feedback Entries</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${analysis.metadata.sampleAnalyzed}</span>
+                            <span class="stat-label">Analyzed</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${analysis.priorityBreakdown?.high || 0}</span>
+                            <span class="stat-label">High Priority</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">${analysis.issueCategories?.length || 0}</span>
+                            <span class="stat-label">Issue Categories</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Aggregate Sentiment
+            html += `
+                <h3>Overall Sentiment Distribution</h3>
+                <p><strong>Overall Sentiment:</strong> ${analysis.aggregateSentiment?.overall || 'Unknown'}</p>
+                <div class="sentiment-bar">
+                    <div class="sentiment-fill positive" style="width: ${posPercent}%"></div>
+                    <div class="sentiment-fill negative" style="width: ${negPercent}%"></div>
+                    <div class="sentiment-fill neutral" style="width: ${neutralPercent}%"></div>
+                </div>
+                <p><small>Positive: ${posPercent}% | Negative: ${negPercent}% | Neutral: ${neutralPercent}%</small></p>
+            `;
+            
+            // Issue Categories
+            if (analysis.issueCategories && analysis.issueCategories.length > 0) {
+                html += '<h3>Issue Categories by Frequency</h3>';
+                analysis.issueCategories.forEach(issue => {
+                    html += `
+                        <div class="category-item priority-${issue.priority}">
+                            <span class="priority-badge badge-${issue.priority}">${issue.priority.toUpperCase()}</span>
+                            <span class="priority-badge badge-${issue.severity || 'minor'}">${(issue.severity || 'minor').toUpperCase()}</span>
+                            <strong>${issue.category}</strong> <small>(${issue.frequency || 0} mentions)</small>
+                            <p>${issue.description}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            // Strategic Recommendations
+            if (analysis.strategicRecommendations && analysis.strategicRecommendations.length > 0) {
+                html += '<h3>Strategic Recommendations</h3><ul>';
+                analysis.strategicRecommendations.forEach(recommendation => {
+                    html += `<li>${recommendation}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            // Processing Details
+            if (analysis.metadata) {
+                html += `
+                    <h3>Processing Details</h3>
+                    <p><small>${analysis.metadata.csvStructure.explanation}</small></p>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        // Display error messages
+        function displayError(type, message) {
+            const resultsDiv = document.getElementById(type === 'single' ? 'results' : 'bulk-results');
+            resultsDiv.innerHTML = `
+                <div class="error-box">
+                    <h4>Analysis Error</h4>
+                    <p><strong>Error:</strong> ${message}</p>
+                    <p>Please try again or check your input. If the problem persists, ensure your server is running and the API endpoints are accessible.</p>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
