@@ -160,7 +160,7 @@
             background: rgba(255,255,255,0.8);
             color: #64748b;
             padding: 16px 32px;
-            border: 1px solid #d4c4a8;
+            border: none;
             font-size: 15px;
             font-weight: 500;
             font-family: 'Nunito', sans-serif;
@@ -193,7 +193,7 @@
             width: 100%;
             height: 200px;
             padding: 24px;
-            border: 1px solid #d4c4a8;
+            border: none;
             border-radius: 16px;
             font-size: 16px;
             font-family: 'Nunito', sans-serif;
@@ -203,13 +203,14 @@
             color: #2d2d2d;
             transition: all 0.3s ease;
             margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         #feedback-input:focus {
             outline: none;
             background: #ffffff;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            border: none;
+            box-shadow: 0 4px 20px rgba(74, 144, 226, 0.15);
         }
 
         #feedback-input::placeholder {
@@ -251,24 +252,35 @@
 
         /* NEW: Sample button styles that match your design */
         .sample-btn {
-            background: rgba(255,255,255,0.9);
-            color: #64748b;
-            padding: 12px 24px;
-            border: 1px solid #d4c4a8;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: 500;
+            background: rgba(255,255,255,0.6);
+            color: #9ca3af;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 400;
             font-family: 'Nunito', sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
-            letter-spacing: -0.3px;
-            margin-left: 16px;
+            letter-spacing: -0.2px;
+            opacity: 0.7;
+            position: absolute;
+            top: -12px;
+            right: 20px;
         }
 
         .sample-btn:hover {
-            background: rgba(255,255,255,1);
-            border-color: #b8a584;
+            background: rgba(255,255,255,0.9);
+            color: #64748b;
+            opacity: 1;
             transform: translateY(-1px);
+        }
+
+        .button-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
         }
 
         .button-group {
@@ -494,7 +506,7 @@
 
         /* File Upload Styles */
         .file-upload-area {
-            border: 2px dashed #d1d5db;
+            border: 2px dashed rgba(209, 213, 219, 0.5);
             border-radius: 16px;
             padding: 50px 40px;
             text-align: center;
@@ -502,6 +514,7 @@
             margin: 30px 0;
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
         }
 
         .file-upload-area:hover {
@@ -608,8 +621,15 @@
                 gap: 12px;
             }
 
+            .button-container {
+                position: relative;
+            }
+
             .sample-btn {
+                position: static;
+                margin-top: 10px;
                 margin-left: 0;
+                opacity: 1;
             }
         }
     </style>
@@ -638,14 +658,16 @@
             
             <!-- Single Analysis Tab -->
             <div id="single-tab" class="tab-content active">
-                <textarea id="feedback-input" placeholder="Paste your customer feedback here...
+                <div style="position: relative;">
+                    <textarea id="feedback-input" placeholder="Paste your customer feedback here...
 
 Try this example:
 The app crashes when I try to upload files. Super frustrating! Love the new dashboard though. Also why can't I export my data? This should be basic functionality. Support team was helpful but took 3 days to respond."></textarea>
+                    <button class="sample-btn" onclick="loadSampleFeedback()" style="position: absolute; top: 15px; right: 20px;">try sample</button>
+                </div>
                 
-                <div class="button-group">
+                <div class="button-container">
                     <button id="analyze-btn" class="analyze-btn" onclick="analyzeFeedback()">analyze feedback</button>
-                    <button class="sample-btn" onclick="loadSampleFeedback()">try sample</button>
                 </div>
                 
                 <div id="loading" class="loading" style="display: none;">
@@ -676,13 +698,13 @@ The app crashes when I try to upload files. Super frustrating! Love the new dash
                     <input type="file" id="csv-upload" class="file-input" accept=".csv" onchange="handleFileUpload(event)">
                     <div class="upload-text">drop your CSV file here or click to browse</div>
                     <div class="upload-subtext">smart processing: works with any CSV format, any column names, handles messy data automatically</div>
+                    <button class="sample-btn" onclick="loadSampleCSV()" style="position: absolute; top: 15px; right: 20px;">try sample dataset</button>
                 </div>
                 
                 <div id="file-selected" style="display: none;"></div>
                 
-                <div class="button-group">
+                <div class="button-container">
                     <button id="analyze-bulk-btn" class="analyze-btn" style="display: none;" onclick="analyzeBulkFeedback()">analyze all feedback</button>
-                    <button class="sample-btn" onclick="loadSampleCSV()" style="display: block;">try sample dataset</button>
                 </div>
                 
                 <div id="bulk-loading" class="loading" style="display: none;">
