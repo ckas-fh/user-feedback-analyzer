@@ -249,6 +249,35 @@
             transform: none;
         }
 
+        /* NEW: Sample button styles that match your design */
+        .sample-btn {
+            background: rgba(255,255,255,0.9);
+            color: #64748b;
+            padding: 12px 24px;
+            border: 1px solid #d4c4a8;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: -0.3px;
+            margin-left: 16px;
+        }
+
+        .sample-btn:hover {
+            background: rgba(255,255,255,1);
+            border-color: #b8a584;
+            transform: translateY(-1px);
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
         .loading {
             text-align: center;
             color: #2d2d2d;
@@ -573,6 +602,15 @@
             .tab-button {
                 width: 200px;
             }
+
+            .button-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .sample-btn {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -605,7 +643,10 @@
 Try this example:
 The app crashes when I try to upload files. Super frustrating! Love the new dashboard though. Also why can't I export my data? This should be basic functionality. Support team was helpful but took 3 days to respond."></textarea>
                 
-                <button id="analyze-btn" class="analyze-btn" onclick="analyzeFeedback()">analyze feedback</button>
+                <div class="button-group">
+                    <button id="analyze-btn" class="analyze-btn" onclick="analyzeFeedback()">analyze feedback</button>
+                    <button class="sample-btn" onclick="loadSampleFeedback()">try sample</button>
+                </div>
                 
                 <div id="loading" class="loading" style="display: none;">
                     <div class="loading-spinner"></div>
@@ -639,7 +680,10 @@ The app crashes when I try to upload files. Super frustrating! Love the new dash
                 
                 <div id="file-selected" style="display: none;"></div>
                 
-                <button id="analyze-bulk-btn" class="analyze-btn" style="display: none;" onclick="analyzeBulkFeedback()">analyze all feedback</button>
+                <div class="button-group">
+                    <button id="analyze-bulk-btn" class="analyze-btn" style="display: none;" onclick="analyzeBulkFeedback()">analyze all feedback</button>
+                    <button class="sample-btn" onclick="loadSampleCSV()" style="display: block;">try sample dataset</button>
+                </div>
                 
                 <div id="bulk-loading" class="loading" style="display: none;">
                     <div class="loading-spinner"></div>
@@ -667,6 +711,62 @@ The app crashes when I try to upload files. Super frustrating! Love the new dash
         let uploadedData = null;
         let isInteracting = false;
         let currentAnalysisData = null;
+
+        // Sample data from your CSV
+        const sampleFeedbacks = [
+            "The app keeps crashing when I try to upload large files. Very frustrating! I lose all my work.",
+            "Love the new dashboard design! So much cleaner and easier to navigate. Great job!",
+            "Support team took 5 days to respond to my ticket. That's way too long for a paid service.",
+            "The export feature doesn't work properly. I can't download my data in CSV format.",
+            "Amazing product! Has saved me hours of work every week. The automation features are fantastic.",
+            "The mobile app is extremely slow. Takes forever to load even basic features.",
+            "Excellent customer service! They helped me set up everything perfectly within an hour.",
+            "The pricing is too high for what you get. Competitors offer similar features for less.",
+            "Integration with other tools is seamless. Makes my workflow so much more efficient.",
+            "The user interface is confusing. Too many buttons and options everywhere. Hard to find what I need."
+        ];
+
+        const sampleCSVData = `customer_id,date,feedback,rating,product_area
+1001,1/15/24,"The app keeps crashing when I try to upload large files. Very frustrating! I lose all my work.",2,Mobile App
+1002,1/15/24,"Love the new dashboard design! So much cleaner and easier to navigate. Great job!",5,Web Platform
+1003,1/16/24,"Support team took 5 days to respond to my ticket. That's way too long for a paid service.",2,Customer Support
+1004,1/16/24,"The export feature doesn't work properly. I can't download my data in CSV format.",3,Web Platform
+1005,1/17/24,"Amazing product! Has saved me hours of work every week. The automation features are fantastic.",5,Automation
+1006,1/17/24,"The mobile app is extremely slow. Takes forever to load even basic features.",2,Mobile App
+1007,1/18/24,"Excellent customer service! They helped me set up everything perfectly within an hour.",5,Customer Support
+1008,1/18/24,"The pricing is too high for what you get. Competitors offer similar features for less.",3,Pricing
+1009,1/19/24,"Integration with other tools is seamless. Makes my workflow so much more efficient.",4,Integrations
+1010,1/19/24,"The user interface is confusing. Too many buttons and options everywhere. Hard to find what I need.",2,Web Platform`;
+
+        // NEW: Sample data functions
+        function loadSampleFeedback() {
+            const randomFeedback = sampleFeedbacks[Math.floor(Math.random() * sampleFeedbacks.length)];
+            document.getElementById('feedback-input').value = randomFeedback;
+            
+            // Trigger the existing behavior for user interaction
+            setFloatingElementsMode('fade-mode');
+        }
+
+        function loadSampleCSV() {
+            // Create a blob from the sample CSV data
+            const blob = new Blob([sampleCSVData], { type: 'text/csv' });
+            uploadedData = sampleCSVData;
+            
+            // Trigger the floating elements to slide away
+            setFloatingElementsMode('slide-mode');
+            
+            // Show file selected indicator
+            const fileSelectedDiv = document.getElementById('file-selected');
+            fileSelectedDiv.innerHTML = `
+                <div class="file-selected">
+                    📄 <strong>sample_feedback.csv</strong> loaded successfully (10 sample entries)
+                </div>
+            `;
+            fileSelectedDiv.style.display = 'block';
+            
+            // Show analyze button
+            document.getElementById('analyze-bulk-btn').style.display = 'block';
+        }
 
         // Function to control floating elements
         function setFloatingElementsMode(mode) {
