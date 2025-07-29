@@ -4,7 +4,7 @@ An AI-powered web application that analyzes user feedback to extract sentiment, 
 
 ## Live Demo
 
-**[Try it live here!]([YOUR_RAILWAY_URL_HERE](https://feedbackanalyzer-production.up.railway.app))**
+**[Try it live here!](https://feedbackanalyzer-production.up.railway.app)**
 
 ## Features
 
